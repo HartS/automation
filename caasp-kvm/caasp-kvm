@@ -322,6 +322,8 @@ render_cluster_tf() {
 
 build() {
   log "CaaS Platform Building"
+  
+  exit 1
 
   log "Downloading CaaSP KVM Image"
   $DIR/../misc-tools/download-image --proxy "${PROXY}" --location "${LOCATION}" --type kvm $IMAGE
