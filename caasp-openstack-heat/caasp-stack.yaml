@@ -8,6 +8,7 @@ parameter_groups:
     parameters:
       - image
       - root_password
+      - include_cap_ports
 
   - label: sizing
     description: Sizing Parameters
@@ -84,6 +85,10 @@ parameters:
     type: string
     description: Root Password for the VMs
     default: linux
+  include_cap_ports:
+    type: string
+    description: Add cap-specific security group to worker nodes
+    default: "off"
 
 resources:
   keypair:
@@ -140,6 +145,31 @@ resources:
           port_range_min: 8472
           port_range_max: 8472
 
+  secgroup_cap_worker_on:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          port_range_min: 2222
+          port_range_max: 2222
+        - protocol: tcp
+          port_range_min: 2793
+          port_range_max: 2793
+        - protocol: tcp
+          port_range_min: 4443
+          port_range_max: 4443
+        - protocol: tcp
+          port_range_min: 8443
+          port_range_max: 8443
+        - protocol: tcp
+          port_range_min: 20000
+          port_range_max: 20010
+
+  secgroup_cap_worker_off:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules: []
+
   secgroup_admin:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -191,20 +221,20 @@ resources:
           port_range_min: 443
           port_range_max: 443
         - protocol: tcp
+          port_range_min: 2380
+          port_range_max: 2380
+        - protocol: tcp
           port_range_min: 8080
           port_range_max: 8080
         - protocol: tcp
           port_range_min: 8081
           port_range_max: 8081
-        - protocol: tcp
-          port_range_min: 2380
-          port_range_max: 2380
-        - protocol: tcp
-          port_range_min: 10250
-          port_range_max: 10250
         - protocol: udp
           port_range_min: 8285
           port_range_max: 8285
+        - protocol: tcp
+          port_range_min: 10250
+          port_range_max: 10250
         - protocol: tcp
           port_range_min: 30000
           port_range_max: 32768
@@ -308,6 +338,7 @@ resources:
           internal_net: { get_resource: internal_network }
           secgroup_base: { get_resource: secgroup_base }
           secgroup_worker: { get_resource: secgroup_worker }
+          secgroup_cap: { get_resource: { list_join: ['_', [ 'secgroup_cap_worker', { get_param: 'include_cap_ports' } ] ] } }
           flavor: { get_param: worker_flavor }
           keypair: { get_resource: keypair }
           root_password: { get_param: root_password }

@@ -7,6 +7,7 @@ HAS_ACTION=false
 RUN_BUILD=false
 RUN_UPDATE=false
 RUN_DESTROY=false
+INCLUDE_CAP_PORTS=off
 
 NAME=caasp-stack
 OPENRC_FILE=
@@ -25,6 +26,8 @@ Usage:
     -m|--masters             <INT>   Number of masters to build (Default: 3)
     -w|--workers             <INT>   Number of workers to build (Default: 2)
     -i|--image               <STR>   Image to use
+    --include-cap-ports              Open additional ports for testing/deployment of SUSE Cloud Application
+                                     Platform (SUSE Cloud Foundry)
 
   * Destroying a cluster
 
@@ -103,6 +106,8 @@ while [[ $# -gt 0 ]] ; do
       echo "$USAGE"
       exit 0
       ;;
+    --include-cap-ports)
+      INCLUDE_CAP_PORTS=on
   esac
   shift
 done
@@ -124,7 +129,8 @@ build_stack() {
   openstack stack create --verbose --wait -e "$HEAT_ENVIRONMENT_FILE" -t caasp-stack.yaml "$NAME" \
     --parameter master_count=$MASTERS \
     --parameter worker_count=$WORKERS \
-    --parameter image="$IMAGE"
+    --parameter image="$IMAGE" \
+    --parameter include_cap_ports=$INCLUDE_CAP_PORTS
 
   log "CaaSP Stack Created with name $NAME"
 

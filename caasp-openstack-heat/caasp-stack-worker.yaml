@@ -24,6 +24,10 @@ parameters:
     type: string
     description: >
       Name or ID of the worker secgroup
+  secgroup_cap:
+    type: string
+    description: >
+      Add cap-specific security group to worker nodes
   flavor:
     type: string
     description: Worker Flavor
@@ -64,6 +68,7 @@ resources:
       security_groups:
         - { get_param: secgroup_base }
         - { get_param: secgroup_worker }
+        - { get_param: secgroup_cap }
       user_data_format: RAW
       user_data:
         str_replace:
